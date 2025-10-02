@@ -28,7 +28,7 @@
 </head>
 <body>
 
-<div class="container d-flex justify-content-center align-items-center vh-100">
+<div class="container d-flex justify-content-center align-items-center vh-100" style="margin-top: 50px;">
     <div class="card register-card p-4 w-100" style="max-width: 500px;">
         <div class="text-center mb-4">
             <div class="placeholder-avatar mx-auto mb-3"></div>
@@ -36,12 +36,25 @@
             <p class="text-muted">Створіть свій акаунт SocialNet</p>
         </div>
 
-        <form action="{{ route('register.submit') }}" method="POST">
+        <form action="{{ route('register.submit') }}" method="POST" enctype="multipart/form-data">
             @csrf
 
             <div class="mb-3">
                 <label for="name" class="form-label">Ім'я</label>
                 <input type="text" class="form-control" id="name" name="name" placeholder="Введіть ваше ім'я" value="{{ old('name') }}" required>
+            </div>
+            <div class="mb-3">
+                <label for="name" class="form-label">Прізвище</label>
+                <input type="text" class="form-control" id="surname" name="surname" placeholder="Введіть ваше прізвище" value="{{ old('surname') }}" required>
+            </div>
+            <div class="mb-3">
+                <label for="birthday" class="form-label">Дата народження</label>
+                <input type="date" class="form-control" id="birthday" name="birthday" value="{{ old('birthday') }}" required>
+            </div>
+            <div class="mb-3">
+                <label for="avatar" class="form-label">Аватар (опціонально)</label>
+                <input type="file" class="form-control" id="avatar" name="avatar" accept="image/jpeg,image/jpg">
+
             </div>
 
             <div class="mb-3">
@@ -79,7 +92,7 @@
             @endif
 
             <p class="text-center text-muted">
-                Вже маєте акаунт? <a href="/login" class="text-primary text-decoration-none">Увійти</a>
+                Вже маєте акаунт? <a href="{{route('login.form')}}" class="text-primary text-decoration-none">Увійти</a>
             </p>
         </form>
     </div>

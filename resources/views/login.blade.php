@@ -98,7 +98,7 @@
             <div class="text-center text-muted">
                 <a href="/forgot-password" class="text-decoration-none">Забули пароль?</a>
                 <br>
-                Ще немає акаунту? <a href="/register" class="text-primary text-decoration-none">Зареєструватися</a>
+                Ще немає акаунту? <a href="{{route('register.form')}}" class="text-primary text-decoration-none">Зареєструватися</a>
             </div>
         </form>
 
