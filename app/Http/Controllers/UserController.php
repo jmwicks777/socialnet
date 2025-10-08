@@ -47,7 +47,7 @@ class UserController extends Controller
     }
     public function search(Request $request)
     {
-        dd($request->query());
+
         return (1);
     }
     public function createPost(Request $request)
