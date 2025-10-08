@@ -35,7 +35,8 @@ class UserController extends Controller
         return view('login');
     }
     public function updateBioUser(Request $request)
-    {   $userID=Auth::user()->id;
+    {
+        $userID=Auth::user()->id;
         $user = User::find($userID);
         $user->update([
             'name'=>$request['name'],
