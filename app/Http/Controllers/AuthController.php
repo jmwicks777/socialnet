@@ -67,7 +67,7 @@ class AuthController extends Controller
             return redirect()->route('social-net.index')->with('success', 'You are now logged in');
         }
 
-        return back()->withErrors(['error' => 'Invalid credentials'])->onlyInput('email');
+        return back()->with(['error' => 'Неправильний email або пароль'])->withInput();
     }
     public function logout(Request $request)
     {

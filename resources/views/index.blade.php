@@ -7,6 +7,14 @@
     <title>SocialNet | Головна</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
+        .card.position-relative .delete-post-btn {
+            opacity: 0;
+            transition: opacity 0.5s;
+        }
+
+        .card.position-relative:hover .delete-post-btn {
+            opacity: 1;
+        }
         .placeholder-card { height: 150px; background-color: #e9ecef; border-radius: 0.5rem; }
         .placeholder-avatar { width: 50px; height: 50px; background-color: #dee2e6; border-radius: 50%; }
         .placeholder-text { height: 12px; background-color: #dee2e6; border-radius: 0.25rem; }
@@ -40,12 +48,22 @@
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
             <span class="navbar-toggler-icon"></span>
         </button>
+
         <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav ms-auto">
+            <ul class="navbar-nav me-auto">
                 <li class="nav-item"><a class="nav-link" href="{{ route('social-net.index') }}">Головна</a></li>
                 <li class="nav-item"><a class="nav-link" href="#">Повідомлення</a></li>
                 <li class="nav-item"><a class="nav-link" href="#">Друзі</a></li>
                 <li class="nav-item"><a class="nav-link" href="#">Профіль</a></li>
+            </ul>
+
+            {{-- 🔍 Пошук --}}
+            <form action="{{ route('search') }}" method="GET" class="d-flex me-3" style="max-width: 250px;">
+                <input type="text" name="query" class="form-control form-control-sm" placeholder="Пошук..." value="{{ request('query') }}">
+                <button class="btn btn-sm btn-outline-primary ms-2" type="submit">🔍</button>
+            </form>
+
+            <ul class="navbar-nav">
                 <li class="nav-item"><a class="nav-link" href="{{ route('register.form') }}">Реєстрація</a></li>
                 <li class="nav-item"><a class="nav-link" href="{{ route('login.form') }}">Вхід</a></li>
                 <li class="nav-item"><a class="nav-link" href="{{ route('logout') }}">Вихід</a></li>
@@ -63,6 +81,7 @@
             <div class="card shadow-sm">
                 <div class="card-body text-center">
                     {{-- Аватар користувача --}}
+
                     @if($user->avatar_path)
                         <img src="{{ asset('storage/'.$user->avatar_path) }}" class="rounded-circle mb-2" style="width:70px;height:70px;" alt="Avatar">
                     @else
@@ -96,26 +115,93 @@
 
         {{-- Головна стрічка --}}
         <div class="col-md-6">
-            @for($i = 0; $i < 3; $i++)
-                <div class="card shadow-sm mb-4">
+
+            {{-- Форма створення нового поста --}}
+            <div class="card shadow-sm mb-4">
+                <div class="card-body">
+                    <form action="{{ route('posts.store') }}" method="POST" enctype="multipart/form-data">
+                        @csrf
+                        <div class="mb-3">
+                            <textarea name="content" class="form-control" rows="3" placeholder="Що у вас нового?" required></textarea>
+                        </div>
+
+                        <div class="mb-3">
+                            <input type="file" name="image" class="form-control" accept="image/*">
+                        </div>
+
+                        {{-- 🔒 Видимість поста --}}
+                        <div class="mb-3">
+                            <label for="visibility" class="form-label">Хто може бачити цей пост?</label>
+                            <select name="visibility" id="visibility" class="form-select" required>
+                                <option value="public">Для всіх</option>
+                                <option value="private">Тільки для друзів</option>
+                            </select>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">Опублікувати</button>
+                    </form>
+                </div>
+            </div>
+
+            {{-- Вивід постів --}}
+            @forelse ($posts as $post)
+                <div class="card shadow-sm mb-4 position-relative">
+                    {{-- Кнопка видалення --}}
+                    <form action="{{ route('posts.destroy', $post['id']) }}" method="POST" class="position-absolute top-0 end-0 m-2 delete-post-form">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="btn btn-sm btn-danger delete-post-btn" title="Видалити пост">✖</button>
+                    </form>
+
                     <div class="card-body">
+                        {{-- Інформація про автора --}}
                         <div class="d-flex align-items-center mb-3">
-                            <div class="placeholder-avatar me-3"></div>
-                            <div class="flex-grow-1">
-                                <div class="placeholder-text medium mb-1"></div>
-                                <div class="placeholder-text short"></div>
+                            @if($user->avatar_path)
+                                <img src="{{ asset('storage/' . $user->avatar_path) }}"
+                                     class="rounded-circle me-3"
+                                     style="width:50px;height:50px;"
+                                     alt="Avatar">
+                            @else
+                                <div class="placeholder-avatar me-3"></div>
+                            @endif
+
+                            <div>
+
+                                <div class="fw-bold">{{ $user->name }} {{ $user->surname }}</div>
+                                <div class="text-muted small">{{ $post['created_at'] }}</div>
                             </div>
                         </div>
-                        <div class="placeholder-card mb-3"></div>
-                        <div class="d-flex gap-3">
-                            <div class="placeholder-text short"></div>
-                            <div class="placeholder-text short"></div>
-                            <div class="placeholder-text short"></div>
+
+                        {{-- Текст поста --}}
+                        <p class="mb-3">{{ $post['body'] }}</p>
+
+                        {{-- Видимість --}}
+                        <small class="text-muted">
+                            👁️ Видимість:
+                            @if($post['visibility'] === 'public')
+                                Для всіх
+                            @else
+                                Тільки для друзів
+                            @endif
+                        </small>
+
+                        {{-- Дії --}}
+                        <div class="d-flex gap-3 mt-3">
+                            <a href="#" class="text-decoration-none">❤️ Подобається</a>
+                            <a href="#" class="text-decoration-none">💬 Коментар</a>
+                            <a href="#" class="text-decoration-none">🔁 Поділитися</a>
                         </div>
                     </div>
                 </div>
-            @endfor
+            @empty
+                <div class="alert alert-info text-center">
+                    Ще немає постів 😔
+                </div>
+            @endforelse
+
         </div>
+
+
 
         {{-- Права панель --}}
         <div class="col-md-3 mb-4">
